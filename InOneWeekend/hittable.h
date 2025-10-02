@@ -2,6 +2,8 @@
 
 #include "interval.h"
 
+class material;
+
 class hit_record // 用于记录光线与物体相交信息的类
 {
 public:
@@ -9,6 +11,7 @@ public:
     vec3 normal; // hit normal
     double t;    // hit time
     bool front_face; // 判断光线是从物体内部还是外部射入
+    shared_ptr<material> mat;
 
     void set_face_normal(const ray &r, const vec3 &outward_normal)
     {
