@@ -19,7 +19,7 @@ public:
     double defocus_angle = 0.0;
     double focus_dist = 10;
 
-    void render(const hittable_list &world)
+    void render(const hittable &world)
     {
         initialize();
 
@@ -86,7 +86,7 @@ private:
         defocus_disk_v = defocus_radius * v;
     }
 
-    color ray_color(const ray &r,int depth, const hittable_list &world)
+    color ray_color(const ray &r,int depth, const hittable &world)
     {
         if (depth <= 0)
             return color(0, 0, 0);
@@ -116,7 +116,7 @@ private:
         auto pixel_sample = pixle00_loc + ((i + offset.x()) * pixel_delta_u + (j + offset.y()) * pixel_delta_v);
 
         auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
-        auto ray_direction = pixel_sample - center;
+        auto ray_direction = pixel_sample - ray_origin;
 
         return ray(ray_origin, ray_direction);
     }
