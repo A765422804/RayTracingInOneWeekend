@@ -10,7 +10,7 @@
 
 #include <chrono>
 
-int main()
+void bouncing_sphere()
 {
     // world
 
@@ -84,10 +84,75 @@ int main()
     cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
 
+    cam.render(world);
+}
+
+void checkered_sphere()
+{
+    hittable_list world;
+
+    auto checker = make_shared<checker_texture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
+
+    world.add(make_shared<sphere>(point3(0, -10, 0), 10, make_shared<lambertian>(checker)));
+    world.add(make_shared<sphere>(point3(0, 10, 0), 10, make_shared<lambertian>(checker)));
+
+    camera cam;
+
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+
+    cam.fov = 20;
+    cam.lookfrom = point3(13, 2, 3);
+    cam.lookat = point3(0, 0, 0);
+    cam.vup = vec3(0, 1, 0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(world);
+}
+
+void earth()
+{
+    auto earth_texture = make_shared<image_texture>("earthmap.jpg");
+    auto earth_surface = make_shared<lambertian>(earth_texture);
+    auto globe = make_shared<sphere>(point3(0, 0, 0), 2, earth_surface);
+
+    camera cam;
+
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+
+    cam.fov = 20;
+    cam.lookfrom = point3(0, 0, 12);
+    cam.lookat = point3(0, 0, 0);
+    cam.vup = vec3(0, 1, 0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(hittable_list(globe));
+}
+
+int main()
+{
     using namespace std::chrono;
     auto start = high_resolution_clock::now();
 
-    cam.render(world);
+    switch (3)
+    {
+    case 1:
+        bouncing_sphere();
+        break;
+    case 2:
+        checkered_sphere();
+        break;
+    case 3:
+        earth();
+        break;
+    }
 
     auto end = high_resolution_clock::now();
     duration<double> elapsed = end - start;

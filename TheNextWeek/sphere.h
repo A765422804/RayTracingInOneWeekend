@@ -14,7 +14,7 @@ public:
     }
 
     // movable
-    sphere(const point3 &center1, const point3 &center2, double radius, shared_ptr<material> mat) : center(center1, center2 - center1), radius(std::fmax(0, radius)), mat(mat) 
+    sphere(const point3 &center1, const point3 &center2, double radius, shared_ptr<material> mat) : center(center1, center2 - center1), radius(std::fmax(0, radius)), mat(mat)
     {
         auto rvec = vec3(radius, radius, radius);
         aabb box1 = aabb(center.at(0) - rvec, center.at(0) + rvec);
@@ -48,6 +48,7 @@ public:
         rec.p = r.at(rec.t);
         vec3 outward_normal = (rec.p - current_center) / radius;
         rec.set_face_normal(r, outward_normal);
+        get_sphere_uv(outward_normal, rec.u, rec.v); // 这里用外法线而不是世界坐标，因为uv映射是相对于球体的，而世界坐标是相对于摄像机的，进行了平移和缩放
         rec.mat = mat;
 
         return true;
@@ -60,4 +61,13 @@ private:
     double radius;
     shared_ptr<material> mat;
     aabb bbox;
+
+    static void get_sphere_uv(const point3 &p, double &u, double &v)
+    {
+        auto theta = std::acos(-p.y());
+        auto phi = std::atan2(-p.z(), p.x()) + pi;
+
+        u = phi / (2 * pi);
+        v = theta / pi;
+    }
 };
