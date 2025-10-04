@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interval.h"
+#include "aabb.h"
 
 class material;
 
@@ -12,6 +13,8 @@ public:
     double t;    // hit time
     bool front_face; // 判断光线是从物体内部还是外部射入
     shared_ptr<material> mat;
+    double u;
+    double v;
 
     void set_face_normal(const ray &r, const vec3 &outward_normal)
     {
@@ -26,4 +29,6 @@ public:
     virtual ~hittable() {}
 
     virtual bool hit(const ray &r, interval ray_t, hit_record &rec) const = 0;
+
+    virtual aabb bounding_box() const = 0;
 };
