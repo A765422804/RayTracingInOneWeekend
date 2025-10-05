@@ -19,6 +19,8 @@ public:
     double defocus_angle = 0.0;
     double focus_dist = 10;
 
+    color background;
+
     void render(const hittable &world)
     {
         initialize();
@@ -35,7 +37,7 @@ public:
                 for (int sample = 0; sample < samples_per_pixel; ++sample)
                 {
                     ray r = get_ray(i, j);
-                    pixel_color += ray_color(r,max_depth, world);
+                    pixel_color += ray_color(r, max_depth, world);
                 }
                 write_color(std::cout, pixel_color * pixel_samples_scale);
             }
@@ -81,33 +83,34 @@ private:
         auto viewport_upper_left = center - focus_dist * w - viewport_u / 2 - viewport_v / 2;
         pixle00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
-        auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle/ 2));
+        auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
         defocus_disk_u = defocus_radius * u;
         defocus_disk_v = defocus_radius * v;
     }
 
-    color ray_color(const ray &r,int depth, const hittable &world)
+    color ray_color(const ray &r, int depth, const hittable &world)
     {
         if (depth <= 0)
             return color(0, 0, 0);
 
         hit_record rec;
-        if (world.hit(r, interval(0.001, infinity), rec))
-        {
-            ray scattered;
-            color attenuation;
-            if (rec.mat->scatter(r, rec, attenuation, scattered))
-            {
-                return attenuation * ray_color(scattered, depth - 1, world);
-            }
-            return color(0, 0, 0);
-        }
 
-        // background 环境光
+        if (!world.hit(r, interval(0.001, infinity), rec))
+            return background;
 
-        vec3 unit_direction = unit_vector(r.direction());
-        auto a = 0.5 * (unit_direction.y() + 1.0);
-        return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
+        ray scattered;
+        color attenuation;
+
+        // 打到自发光材质
+        color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
+
+        if (!rec.mat->scatter(r, rec, attenuation, scattered))
+            return color_from_emission;
+
+        // 散射出去
+        color color_from_scatter = ray_color(scattered, depth - 1, world);
+
+        return color_from_emission + attenuation * color_from_scatter;
     }
 
     ray get_ray(int i, int j) const

@@ -105,3 +105,13 @@ public:
 
 const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
 const aabb aabb::universe = aabb(interval::universe, interval::universe, interval::universe);
+
+aabb operator+(const aabb &box, const vec3 &t)
+{
+    return aabb(box.x + t.x(), box.y + t.y(), box.z + t.z());
+}
+
+aabb operator+(const vec3 &t, const aabb &box)
+{
+    return box + t;
+}
